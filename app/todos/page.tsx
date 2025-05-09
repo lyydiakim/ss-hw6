@@ -16,7 +16,7 @@ export default async function TodosPage() {
     return <div>Please sign in to access todo</div>;
   }
 
-  const todos = await db
+  const todos: Todo[] = await db
     .select()
     .from(todosTable)
     .where(eq(todosTable.userId, session.user.id));
