@@ -1,3 +1,5 @@
+//  ADMIN'S PAGE
+
 import { desc } from "drizzle-orm";
 
 import { db } from "@/database/db";
