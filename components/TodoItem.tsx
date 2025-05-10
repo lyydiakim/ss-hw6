@@ -26,20 +26,16 @@ export function TodoItem({ todo }: { todo: Todo }) {
 
   const [state, formAction] = useActionState(toggleTodoWithState, null);
 
-  // Handle checkbox change with optimistic update
   const handleToggle = () => {
-    // Create form data with todo ID
     const formData = new FormData();
     formData.append("id", todo.id);
 
-    // Start transition to prevent UI freeze
+    // transition to prevent UI freeze
     startTransition(() => {
-      // Update optimistic state
       setOptimisticTodo((prevState) => ({
         ...prevState,
         completed: !prevState.completed,
       }));
-      // Submit the action
       formAction(formData);
     });
   };

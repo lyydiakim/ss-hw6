@@ -77,34 +77,27 @@ export async function deleteTodo(formData: FormData): Promise<void> {
   });
 
   if (!session?.user) {
-    // Instead of returning an error, log it or show it on the UI
     console.error("Not authenticated.");
     return;
   }
 
   // Only admins can delete
   if (session.user.role !== "admin") {
-    // Instead of returning an error, log it or show it on the UI
     console.error("Need admin access.");
     return;
   }
 
-  // Extract todo ID
   const id = formData.get("id") as string;
   if (!id) {
-    // Instead of returning an error, log it or show it on the UI
     console.error("Todo ID required.");
     return;
   }
 
   try {
-    // Delete the todo
     await db.delete(todos).where(eq(todos.id, id));
 
-    // Trigger revalidation after deletion
     revalidatePath("/admin");
   } catch (error) {
-    // Log any error that occurs during the deletion process
     console.error("Error deleting todo:", error);
   }
 }

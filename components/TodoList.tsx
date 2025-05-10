@@ -24,7 +24,6 @@ function SubmitButton() {
 export function TodoList({ todos }: { todos: Todo[] }) {
   const formRef = useRef<HTMLFormElement>(null);
 
-  // Updated action state type
   const createTodoWithState = (
     state:
       | { error: string; success?: undefined }
@@ -35,14 +34,12 @@ export function TodoList({ todos }: { todos: Todo[] }) {
 
   const [state, formAction] = useActionState(createTodoWithState, null);
 
-  // Use only the initial todos array as the state argument for useOptimistic
   const [optimisticTodos, addOptimisticTodo] = useOptimistic<Todo[]>(todos);
 
   const clientAction = (formData: FormData) => {
     const title = formData.get("title") as string;
 
     if (title && title.trim() !== "") {
-      // Now we update optimisticTodos correctly
       addOptimisticTodo((prevTodos) => [
         ...prevTodos,
         {
@@ -51,12 +48,12 @@ export function TodoList({ todos }: { todos: Todo[] }) {
           completed: false,
           userId: "pending",
           createdAt: new Date(),
-        } as Todo, // Ensure it's typed as Todo
+        } as Todo,
       ]);
-      formRef.current?.reset(); // Resetting the form
+      formRef.current?.reset();
     }
 
-    formAction(formData); // Trigger the form action with formData
+    formAction(formData);
   };
 
   return (
