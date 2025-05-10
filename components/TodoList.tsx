@@ -7,8 +7,8 @@ import { TodoItem } from "./TodoItem";
 
 import { createTodo } from "@/actions/todos";
 import { useRef } from "react";
-import { useActionState } from "react"; //!
-import { useOptimistic } from "react"; //!
+import { useActionState } from "react";
+import { useOptimistic } from "react";
 import { useFormStatus } from "react-dom";
 
 function SubmitButton() {
@@ -24,31 +24,39 @@ function SubmitButton() {
 export function TodoList({ todos }: { todos: Todo[] }) {
   const formRef = useRef<HTMLFormElement>(null);
 
-  const createTodoWithState = (prevState: any, formData: FormData) =>
-    createTodo(formData);
+  // Updated action state type
+  const createTodoWithState = (
+    state:
+      | { error: string; success?: undefined }
+      | { success: boolean; error?: undefined }
+      | null,
+    formData: FormData
+  ) => createTodo(formData);
 
   const [state, formAction] = useActionState(createTodoWithState, null);
 
-  const [optimisticTodos, addOptimisticTodo] = useOptimistic(
-    todos,
-    (state: Todo[], newTodo: Todo) => [...state, newTodo]
-  );
+  // Use only the initial todos array as the state argument for useOptimistic
+  const [optimisticTodos, addOptimisticTodo] = useOptimistic<Todo[]>(todos);
 
   const clientAction = (formData: FormData) => {
     const title = formData.get("title") as string;
 
     if (title && title.trim() !== "") {
-      addOptimisticTodo({
-        id: `temp-${Date.now()}`,
-        title,
-        completed: false,
-        userId: "pending",
-        createdAt: new Date(),
-      } as Todo);
-      formRef.current?.reset(); //resetting the form
+      // Now we update optimisticTodos correctly
+      addOptimisticTodo((prevTodos) => [
+        ...prevTodos,
+        {
+          id: `temp-${Date.now()}`,
+          title,
+          completed: false,
+          userId: "pending",
+          createdAt: new Date(),
+        } as Todo, // Ensure it's typed as Todo
+      ]);
+      formRef.current?.reset(); // Resetting the form
     }
 
-    formAction(formData);
+    formAction(formData); // Trigger the form action with formData
   };
 
   return (

@@ -9,13 +9,21 @@ import { useState, useTransition } from "react";
 
 export function TodoItem({ todo }: { todo: Todo }) {
   // Track optimistic state locally
-  const [optimisticTodo, setOptimisticTodo] = useOptimistic(todo);
+  const [optimisticTodo, setOptimisticTodo] = useOptimistic<Todo>(todo);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  // Create wrapper for toggleTodo
-  const toggleTodoWithState = (prevState: any, formData: FormData) =>
-    toggleTodo(formData);
+  // Create wrapper for toggleTodo with correct type
+  const toggleTodoWithState = (
+    state:
+      | { error: string; success?: undefined }
+      | { success: boolean; error?: undefined }
+      | null,
+    formData: FormData
+  ) => {
+    return toggleTodo(formData);
+  };
+
   const [state, formAction] = useActionState(toggleTodoWithState, null);
 
   // Handle checkbox change with optimistic update
@@ -27,10 +35,10 @@ export function TodoItem({ todo }: { todo: Todo }) {
     // Start transition to prevent UI freeze
     startTransition(() => {
       // Update optimistic state
-      setOptimisticTodo({
-        ...optimisticTodo,
-        completed: !optimisticTodo.completed,
-      });
+      setOptimisticTodo((prevState) => ({
+        ...prevState,
+        completed: !prevState.completed,
+      }));
       // Submit the action
       formAction(formData);
     });
@@ -38,7 +46,6 @@ export function TodoItem({ todo }: { todo: Todo }) {
 
   // Show error if toggle failed
   if (state?.error && !isPending) {
-    // Could use a toast library like sonner here
     setError(state.error);
   }
 
